@@ -1,20 +1,20 @@
 from django.test import TestCase
 
-from order.factories import OrderFactory, ProductFactory
-from order.serializers import OrderSerializer
+from product.factories import CategoryFactory, ProductFactory
+from product.serializers import ProductSerializer
 
 
-class TestOrderSerializer(TestCase):
+class TestProductSerializer(TestCase):
     def setUp(self) -> None:
-        self.product_1 = ProductFactory()
-        self.product_2 = ProductFactory()
+        self.category = CategoryFactory(title="technology")
+        self.product_1 = ProductFactory(
+            title="mouse", price=100, category=[self.category]
+        )
+        self.product_serializer = ProductSerializer(self.product_1)
 
-        self.order = OrderFactory(product=(self.product_1, self.product_2))
-        self.order_serializer = OrderSerializer(self.order)
-
-    def test_order_serializer(self):
-        serializer_data = self.order_serializer.data
+    def test_product_serializer(self):
+        serializer_data = self.product_serializer.data
+        self.assertEquals(serializer_data["price"], 100)
+        self.assertEquals(serializer_data["title"], "mouse")
         self.assertEquals(
-            serializer_data["product"][0]["title"], self.product_1.title)
-        self.assertEquals(
-            serializer_data["product"][1]["title"], self.product_2.title)
+            serializer_data["category"][0]["title"], "technology")
