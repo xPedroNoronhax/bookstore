@@ -32,10 +32,11 @@ jobs:
       shell: bash
       run: python -m poetry install
 
-    - name: Set PYTHONPATH
-      run: echo "::set-env name=PYTHONPATH::$(pwd)"
+    - name: Set up environment variables
+      env:
+        PYTHONPATH: ${{ secrets.PYTHONPATH }}
+      run: echo "PYTHONPATH=$PYTHONPATH" >> $GITHUB_ENV
 
     - name: Test
       run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
         poetry run python manage.py test
