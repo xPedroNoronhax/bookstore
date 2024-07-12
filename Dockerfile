@@ -27,7 +27,6 @@ ENV PYTHONUNBUFFERED=1 \
     PYSETUP_PATH="/opt/pysetup" \
     VENV_PATH="/opt/pysetup/.venv"
 
-
 # prepend poetry and venv to path
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
@@ -36,27 +35,24 @@ RUN apt-get update \
         # deps for installing poetry
         curl \
         # deps for building python deps
-        build-essential
+        build-essential \
+        # install git
+        git
 
 # install poetry - respects $POETRY_VERSION & $POETRY_HOME
 RUN curl -sSL https://install.python-poetry.org | python3 
 
 # install postgres dependencies inside of Docker
+RUN apt-get update \
+    && apt-get -y install postgresql \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg2-binary
 
-#Esse foi o formato final que testei:
-RUN apt-get update 
-RUN apt-get -y install postgresql
-RUN apt-get -y install libpq-dev gcc
-RUN pip install psycopg2-binary
-
-# copy project requirement files here to ensure they will be cached.
+# copy project requirement files here to ensure they will be cached
 WORKDIR $PYSETUP_PATH
 COPY poetry.lock pyproject.toml ./
 
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
-# RUN poetry install --only main
-
-# quicker install as runtime deps are already installed`
 RUN poetry install
 
 WORKDIR /app
